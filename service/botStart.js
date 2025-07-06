@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const botStart = async (ctx) => {
   const telegramUser = ctx.from;
-  const response = await axios.get(`http://localhost:3002/users/tg?telegramId=${telegramUser.id}`)
+  const response = await axios.get(`https://dastavka.onrender.com/users/tg?telegramId=${telegramUser.id}`)
   let message = `👋 Assalomu alaykum, hurmatli mijoz ${telegramUser.first_name}!
 
 🍽 Bizning xizmat orqali shahar va tumanlardagi eng yaxshi restoranlardan tez va qulay tarzda ovqat buyurtma qilishingiz mumkin.`
