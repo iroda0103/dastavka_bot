@@ -1,69 +1,27 @@
 const { Telegraf, Markup } = require('telegraf');
-// const config = require("./config");
-const axios = require('axios');
+const express = require('express');
+const cors = require('cors');
+const config = require("./config");
+const router = require('./router');
+const service = require('./service');
 
-const bot = new Telegraf('8191500231:AAG8IxtNqCtUyDeb1PEBinO6_fBz2E22JE8');
+const app = express();
+const bot = new Telegraf(config.tg.botToken);
+
+app.use(express.json());
+app.use(cors());
+app.use(router);
 
 bot.catch((err, ctx) => {
   console.error(`Error for user ${ctx.from?.id}:`, err);
 });
 console.log("Bot is starting...");
 
-
 //start komandasi
-bot.start(async (ctx) => {
-  const telegramUser = ctx.from;
-  // ctx.reply(
-  //   'Ro‘yxatdan o‘tish uchun telefon raqamingizni yuboring:',
-  //   Markup.keyboard([
-  //     Markup.button.contactRequest('📱 Telefon raqamni yuborish')
-  //   ])
-  //     .oneTime()
-  //     .resize()
-  // );
-  const keyboard = Markup.keyboard([
-    [Markup.button.callback("📋 Buyurtmalarim", "orders"), Markup.button.callback("📞 Aloqa", "aloqa")],
-    // [Markup.button.callback("📋 ⚙️ Sozlamalar", "orders")],
-    [Markup.button.webApp('🛍 Buyurtma berish', 'https://eltuv.vercel.app/')]
-  ]).resize();
+bot.start((ctx) => service.botStart(ctx, bot));
 
-  await ctx.reply(
-    `Salom ${telegramUser.first_name}! 🍕\n\nOvqat yetkazib berish xizmatimizga xush kelibsiz!\n\nQuyidagi tugmalardan birini tanlang:`,
-    keyboard
-  );
-});
 
-// // Telefon raqam qabul qilish
-bot.on('contact', async (ctx) => {
-  const contact = ctx.message.contact;
-  const phone = contact.phone_number;
-  const firstName = contact.first_name || 'Foydalanuvchi';
-
-  try {
-    const response = await axios.post('http://localhost:3002/auth/register', {
-      phone: phone,
-      password: phone,
-      name: firstName,
-      role: 'client'
-    });
-
-    console.log('API Response:', response.data);
-
-    if (response.data.success) {
-      ctx.reply('✅ Ro‘yxatdan muvaffaqiyatli o‘tdingiz!');
-    } else if (typeof response.data === 'string' && response.data.includes('User already exists')) {
-      ctx.reply('ℹ️ Siz allaqachon ro‘yxatdan o‘tgansiz.');
-    } else if (Array.isArray(response.data)) {
-      ctx.reply('ℹ️ Siz allaqachon ro‘yxatdan o‘tgansiz.');
-    } else {
-      ctx.reply('❌ Ro‘yxatdan o‘tishda noma’lum xatolik yuz berdi.');
-    }
-
-  } catch (error) {
-    console.error('API Error:', error.response?.data || error.message);
-    ctx.reply('❌ Server bilan bog‘lanishda muammo yuz berdi.');
-  }
-});
+bot.on('contact', (ctx) => service.contact(ctx, bot));
 
 bot.command('all', (ctx) => {
 
@@ -73,78 +31,47 @@ bot.command('all', (ctx) => {
   ]).resize());
 });
 
-bot.hears('📋 Buyurtmalarim', async (ctx) => {
-  const orders = [
-    {
-      orderId: 'A1234',
-      status: 'confirmed',
-      restaurantName: 'Pishloqli Pizza',
-      totalAmount: 85000,
-      orderDate: new Date('2025-06-01'),
-      items: [
-        { name: 'Pishloqli pizza', quantity: 1, price: 50000 },
-        { name: 'Coca-Cola 1.5L', quantity: 2, price: 17500 }
-      ]
-    },
-    {
-      orderId: 'B5678',
-      status: 'delivering',
-      restaurantName: 'Shashlik House',
-      totalAmount: 120000,
-      orderDate: new Date('2025-05-28'),
-      items: [
-        { name: 'Mol go‘shti shashlik', quantity: 2, price: 40000 },
-        { name: 'Non', quantity: 2, price: 10000 },
-        { name: 'Choy', quantity: 1, price: 20000 }
-      ]
+bot.hears('🧾 Mening buyurtmalarim', (ctx) => service.myOrder(ctx));
+
+bot.command('address', async (ctx) => {
+  ctx.reply('🍽 Taom buyurtma qilish uchun manzilingizni yuboring:', {
+    reply_markup: {
+      keyboard: [
+        [{ text: 'Lokatsiyani yuborish', request_location: true }]
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: true
     }
-  ];
-
-  const statusEmoji = {
-    'pending': '⏳',
-    'confirmed': '✅',
-    'preparing': '👨‍🍳',
-    'ready': '🍽',
-    'delivering': '🚚',
-    'delivered': '✅',
-    'cancelled': '❌'
-  };
-
-  let message = '📋 Sizning buyurtmalaringiz:\n\n';
-
-  orders.forEach((order, index) => {
-    message += `${index + 1}. Buyurtma #${order.orderId}\n`;
-    message += `${statusEmoji[order.status]} Status: ${order.status}\n`;
-    message += `🏪 Restoran: ${order.restaurantName}\n`;
-    message += `📅 Sana: ${order.orderDate.toLocaleDateString()}\n`;
-    message += `🍽 Taomlar:\n`;
-
-    order.items.forEach((item) => {
-      message += `  • ${item.quantity} ta ${item.name}  — ${(item.price * item.quantity).toLocaleString()} so'm\n`;
-    });
-
-    message += `💰 Umumiy: ${order.totalAmount.toLocaleString()} so'm\n\n`;
   });
+})
 
-  await ctx.reply(message);
+// 1. Boshlanish
+bot.command('location', (ctx) => {
+  ctx.reply('📍 Manzilingizni yuboring:', {
+    reply_markup: {
+      keyboard: [
+        [{ text: 'Lokatsiyani yuborish', request_location: true }]
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: true
+    }
+  });
 });
 
-
-// Foydalanuvchi yuborgan xabarlarni qayta ishlash
-async function startBot() {
-  try {
-    await bot.launch();
-    console.log("🤖 Bot ishga tushdi");
-
-    // Setup graceful stop
-    process.once('SIGINT', () => bot.stop('SIGINT'));
-    process.once('SIGTERM', () => bot.stop('SIGTERM'));
-  } catch (error) {
-    console.error("❌ Bot ishga tushirishda xatolik:", error);
-    process.exit(1);
-  }
-}
+// 2. Lokatsiyani qabul qilish
+bot.on('location', (ctx) => {
+  const location = ctx.message.location;
+  // Lokatsiyani saqlab qo‘yish
+  ctx.reply('✅ Manzilingiz saqlandi. Endi taom tanlang!', Markup.inlineKeyboard([
+    Markup.button.webApp('🍽 Taom buyurtma qilish', 'https://eltuv.vercel.app/')
+  ]));
+  // Davom ettirish: menyuni ko‘rsatish
+});
 
 // Botni ishga tushirish
-startBot().catch(console.error);
+service.startBot(bot).catch(console.error);
 
+
+app.listen(config.port || 3030, () => {
+  console.log(`🚀 Server running on http://localhost:${config.port || 3030}`);
+});
