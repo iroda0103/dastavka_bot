@@ -1,3 +1,6 @@
+const axios = require('axios');
+const { Markup } = require('telegraf');
+
 const contact = async (ctx) => {
   try {
     const contact = ctx.message.contact;

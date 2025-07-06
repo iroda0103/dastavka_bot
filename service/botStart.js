@@ -6,6 +6,7 @@ const botStart = async (ctx) => {
   let message = `👋 Assalomu alaykum, hurmatli mijoz ${telegramUser.first_name}!
 
 🍽 Bizning xizmat orqali shahar va tumanlardagi eng yaxshi restoranlardan tez va qulay tarzda ovqat buyurtma qilishingiz mumkin.`;
+  console.log('ishladi');
 
   try {
     // const response = await axios.get(`http://localhost:3002/users/tg?telegramId=${telegramUser.id}`);
@@ -35,9 +36,22 @@ const botStart = async (ctx) => {
       );
     }
   } catch (error) {
-    console.error('❌ Error in botStart:', error.message);
-    await ctx.reply("❗️ Kechirasiz, server bilan bog‘lanishda xatolik yuz berdi. Keyinroq urinib ko‘ring.");
+    // if (error.response.status == 404) {
+      message += `\n\n📲 Davom etish uchun, iltimos telefon raqamingizni yuboring:`;
+
+      await ctx.reply(message,
+        Markup.keyboard([
+          Markup.button.contactRequest('📱 Telefon raqamni yuborish')
+        ])
+          .oneTime()
+          .resize()
+      );
+    // } else {
+    //   console.error('❌ Error in botStart:', error.message);
+    //   await ctx.reply("❗️ Kechirasiz, server bilan bog‘lanishda xatolik yuz berdi. Keyinroq urinib ko‘ring.");
+    // }
   }
+
 };
 
 module.exports = botStart;
