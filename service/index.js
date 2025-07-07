@@ -1,5 +1,5 @@
 const startBot = require('./start');
-const myOrder = require('./myOrder');
+const {myOrder} = require('./myOrder');
 const botStart=require('./botStart')
 const contact = require('./contact');
 
