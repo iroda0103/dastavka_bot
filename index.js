@@ -133,17 +133,7 @@ bot.on('callback_query', async (ctx) => {
       const clientTelegramId = parts[2];
       const driverId = parts[3];
       const clientId = parts[4];
-//  "address": "Arabon",
-//     "clientId": 3,
-//     "driverId": 9,
-//     "restaurantId": 2,
-//     "items": [
-//         {
-//             "menuId": 2,
-//             "quantity": 1
-//             // "notes": "Tokmasdan op kelin pls"
-//         }
-//     ]
+
       // API dan to'liq buyurtma ma'lumotlarini olish
       // const orderResponse = await axios.post(`https://dastavka.onrender.com/orders`,{
       //   address:orderId.
@@ -166,7 +156,7 @@ bot.on('callback_query', async (ctx) => {
 
       // Mijozga xabar
       await ctx.telegram.sendMessage(
-        clientId,
+        clientTelegramId,
         `🚗 Haydovchi ${ctx.callbackQuery.from.first_name} buyurtmangizni qabul qildi!\n Haydovchilar siz bilan tez orada bog\'lanadi.`
       );
 
