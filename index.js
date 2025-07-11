@@ -151,11 +151,16 @@ bot.on('callback_query', async (ctx) => {
 
     if (callbackData.startsWith('accept_')) {
       const [_, orderId, clientChatId, driverId] = callbackData.split('_');
+      console.log('test', driverId, {
+        driverId: +driverId,
+        status: 'confirmed',
+        // acceptedAt: new Date().toISOString()
+      });
 
       // 1. Update order in database
       try {
-        await axios.patch(`https://api.suvtekin.uz/orders/${orderId}`, {
-          driverId: driverId,
+        await axios.patch(`http://localhost:3002/orders/${orderId}`, {
+          driverId: +driverId,
           status: 'confirmed',
           // acceptedAt: new Date().toISOString()
         });
