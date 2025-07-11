@@ -9,7 +9,7 @@ const myOrder = async (ctx) => {
         
         // API dan buyurtmalarni olish
         // const response = await axios.get(`http://localhost:3002/orders/my-orders/${userId}`);
-        const response = await axios.get(`https://dastavka.onrender.com/orders/my-orders/${userId}`);
+        const response = await axios.get(`https://api.suvtekin.uz/orders/my-orders/${userId}`);
         const orders = response.data;
 
         if (!orders || orders.length === 0) {

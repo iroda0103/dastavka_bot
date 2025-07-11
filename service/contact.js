@@ -15,7 +15,7 @@ const contact = async (ctx) => {
     }
 
     // const response = await axios.post('http://localhost:3002/auth/register', data);
-    const response = await axios.post('https://dastavka.onrender.com/auth/register', data);
+    const response = await axios.post('https://api.suvtekin.uz/auth/register', data);
     console.log(`User registered: ${response}`);
 
     if (response.data) {

@@ -2,15 +2,19 @@ const { Markup } = require('telegraf');
 const axios = require('axios');
 
 const botStart = async (ctx) => {
+  
   const telegramUser = ctx.from;
+  console.log(telegramUser);
+  
   let message = `👋 Assalomu alaykum, hurmatli mijoz ${telegramUser.first_name}!
 
 🍽 Bizning xizmat orqali shahar va tumanlardagi eng yaxshi restoranlardan tez va qulay tarzda ovqat buyurtma qilishingiz mumkin.`;
   console.log('ishladi');
 
   try {
+    const response = await axios.get(`https://api.suvtekin.uz/users/tg?telegramId=${telegramUser.id}`);
     // const response = await axios.get(`http://localhost:3002/users/tg?telegramId=${telegramUser.id}`);
-    const response = await axios.get(`https://dastavka.onrender.com/users/tg?telegramId=${telegramUser.id}`);
+    // const response = await axios.get(`https://dastavka.onrender.com/users/tg?telegramId=${telegramUser.id}`);
     const user = response.data; // Backend `findOne` bitta obyekt yoki {} qaytaryapti
 
     console.log('Telegram ID:', telegramUser.id, 'User:', user);
